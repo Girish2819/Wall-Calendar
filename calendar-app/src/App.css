@@ -1,0 +1,261 @@
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  background: #f4f7fb;
+  font-family: Inter, Arial, sans-serif;
+  color: #102a43;
+}
+
+.calendar-wrapper {
+  width: min(100%, 420px);
+  background: #ffffff;
+  border-radius: 28px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.14);
+}
+
+.spiral {
+  height: 22px;
+  background: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
+
+.spiral::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 14px;
+  border-radius: 0 0 16px 16px;
+  background: #f4f7fb;
+}
+
+.spiral::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to right,
+    rgba(15, 23, 42, 0.9) 0 2px,
+    transparent 2px 6px
+  );
+  opacity: 0.75;
+}
+
+.image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-container img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 64%,
+    76% 76%,
+    52% 70%,
+    28% 76%,
+    0 64%
+  );
+}
+
+.blue-shape {
+  position: absolute;
+  bottom: 0;
+  background: #1e90ff;
+  pointer-events: none;
+}
+
+.blue-shape.left {
+  left: 0;
+  width: 42%;
+  height: 44%;
+  clip-path: polygon(0 100%, 100% 74%, 100% 100%, 0 100%);
+}
+
+.blue-shape.right {
+  right: 0;
+  width: 58%;
+  height: 58%;
+  clip-path: polygon(24% 100%, 100% 100%, 100% 0);
+}
+
+.month-text {
+  position: absolute;
+  bottom: 22px;
+  right: 18px;
+  text-align: right;
+  color: #ffffff;
+}
+
+.month-text .month-year {
+  display: block;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.88;
+}
+
+.month-text .month-name {
+  display: block;
+  font-size: 2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.calendar-body {
+  display: flex;
+  gap: 16px;
+  padding: 20px 18px 24px;
+}
+
+.notes {
+  width: 32%;
+  min-width: 110px;
+}
+
+.notes p {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #273449;
+}
+
+.note-line {
+  height: 12px;
+  border-bottom: 1px solid #d9e2ec;
+  margin-bottom: 10px;
+}
+
+.grid {
+  width: 68%;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.header {
+  font-size: 0.68rem;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7b8698;
+}
+
+.header:nth-child(6),
+.header:nth-child(7) {
+  color: #1e90ff;
+}
+
+.day {
+  min-height: 32px;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.92rem;
+  background: transparent;
+  color: #283047;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.day:hover {
+  background: rgba(30, 144, 255, 0.12);
+}
+
+.day.weekend {
+  color: #1e90ff;
+  font-weight: 700;
+}
+
+.day.faded {
+  color: #bcc3d1;
+  background: transparent;
+  cursor: default;
+}
+
+.day.faded:hover {
+  background: transparent;
+}
+
+.day.faded.weekend {
+  color: #bcc3d1;
+}
+
+.day.today {
+  border: 1.5px solid #1e90ff;
+  color: #1e90ff;
+  background: rgba(30, 144, 255, 0.08);
+}
+
+.bottom-fade {
+  height: 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(15, 23, 42, 0.05));
+}
+
+@media (max-width: 720px) {
+  .calendar-body {
+    flex-direction: column;
+  }
+
+  .notes,
+  .grid {
+    width: 100%;
+  }
+
+  .grid {
+    gap: 8px;
+  }
+
+  .image-container img {
+    height: 200px;
+  }
+}
+
+@media (max-width: 520px) {
+  .calendar-wrapper {
+    width: 100%;
+  }
+
+  .image-container img {
+    height: 180px;
+  }
+
+  .month-text .month-name {
+    font-size: 1.5rem;
+  }
+
+  .calendar-body {
+    gap: 12px;
+    padding: 16px 16px 20px;
+  }
+
+  .notes p {
+    font-size: 0.88rem;
+  }
+
+  .header {
+    font-size: 0.65rem;
+  }
+
+  .day {
+    min-height: 36px;
+    padding: 7px 4px;
+    font-size: 0.85rem;
+  }
+}
