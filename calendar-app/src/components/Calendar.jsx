@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isWithinInterval } from "date-fns";
+import { 
+  format, addMonths, subMonths, 
+  startOfMonth, startOfWeek, addDays 
+} from "date-fns";
 import DayCell from "./DayCell";
 import Notes from "./Notes";
 
@@ -15,18 +18,8 @@ const HOLIDAYS = {
 };
 
 const HERO_IMAGES = [
-  "/1.jpg",
-  "/2.jpg",
-  "/3.jpg",
-  "/4.jpg",
-  "/5.jpg",
-  "/6.jpg",
-  "/7.jpg",
-  "/8.jpg",
-  "/9.jpg",
-  "/10.jpg",
-  "/11.jpg",
-  "/12.jpg",
+  "/1.jpg","/2.jpg","/3.jpg","/4.jpg","/5.jpg","/6.jpg",
+  "/7.jpg","/8.jpg","/9.jpg","/10.jpg","/11.jpg","/12.jpg",
 ];
 
 export default function Calendar() {
@@ -34,20 +27,60 @@ export default function Calendar() {
   const [range, setRange] = useState({ start: null, end: null });
   const [monthlyNote, setMonthlyNote] = useState("");
   const [rangeNotes, setRangeNotes] = useState({});
+  const [monthRanges, setMonthRanges] = useState({});
   const [isFlipping, setIsFlipping] = useState(false);
 
   const heroImage = HERO_IMAGES[viewDate.getMonth() % HERO_IMAGES.length];
 
-  
+  const getMonthKey = (date) => format(date, "yyyy-MM");
+
+  useEffect(() => {
+    const savedNotes = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
+    const key = getMonthKey(viewDate);
+    setMonthlyNote(savedNotes[key] || "");
+  }, [viewDate]);
+
+  useEffect(() => {
+    const savedNotes = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
+    const key = getMonthKey(viewDate);
+    savedNotes[key] = monthlyNote;
+    localStorage.setItem("monthlyNotes", JSON.stringify(savedNotes));
+  }, [monthlyNote, viewDate]);
+
+  useEffect(() => {
+    const savedRangeNotes = JSON.parse(localStorage.getItem("rangeNotes")) || {};
+    setRangeNotes(savedRangeNotes);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("rangeNotes", JSON.stringify(rangeNotes));
+  }, [rangeNotes]);
+
+  useEffect(() => {
+    const savedRanges = JSON.parse(localStorage.getItem("monthRanges")) || {};
+    setMonthRanges(savedRanges);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("monthRanges", JSON.stringify(monthRanges));
+  }, [monthRanges]);
+
+  useEffect(() => {
+    const key = format(viewDate, "yyyy-MM");
+    if (monthRanges[key]) {
+      setRange({
+        start: new Date(monthRanges[key].start),
+        end: monthRanges[key].end ? new Date(monthRanges[key].end) : null
+      });
+    } else {
+      setRange({ start: null, end: null });
+    }
+  }, [viewDate, monthRanges]);
+
   useEffect(() => {
     const handleKeyPress = (e) => {
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        handleNextMonth();
-      } else if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        handlePrevMonth();
-      }
+      if (e.key === "ArrowRight") handleNextMonth();
+      if (e.key === "ArrowLeft") handlePrevMonth();
     };
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
@@ -69,7 +102,6 @@ export default function Calendar() {
     }, 300);
   };
 
-  
   const days = [];
   let day = startOfWeek(startOfMonth(viewDate), { weekStartsOn: 1 });
   for (let i = 0; i < 42; i++) {
@@ -78,19 +110,39 @@ export default function Calendar() {
   }
 
   const handleDateClick = (d) => {
+    let newRange;
+
     if (!range.start || (range.start && range.end)) {
-      setRange({ start: d, end: null });
+      newRange = { start: d, end: null };
     } else if (d > range.start) {
-      setRange({ ...range, end: d });
+      newRange = { ...range, end: d };
     } else {
-      setRange({ start: d, end: null });
+      newRange = { start: d, end: null };
     }
+
+    setRange(newRange);
+
+    const key = format(viewDate, "yyyy-MM");
+
+    setMonthRanges({
+      ...monthRanges,
+      [key]: {
+        start: newRange.start,
+        end: newRange.end
+      }
+    });
   };
 
   const getRangeKey = () => {
     if (!range.start) return null;
-    if (!range.end) return `${format(range.start, "yyyy-MM-dd")}`;
-    return `${format(range.start, "yyyy-MM-dd")}_${format(range.end, "yyyy-MM-dd")}`;
+
+    const monthKey = format(viewDate, "yyyy-MM");
+
+    if (!range.end) {
+      return `${monthKey}_${format(range.start, "yyyy-MM-dd")}`;
+    }
+
+    return `${monthKey}_${format(range.start, "yyyy-MM-dd")}_${format(range.end, "yyyy-MM-dd")}`;
   };
 
   const getRangeLabel = () => {
@@ -102,15 +154,13 @@ export default function Calendar() {
   const currentRangeKey = getRangeKey();
   const currentRangeLabel = getRangeLabel();
 
-
   return (
     <div className="calendar-container">
-      {/* ── Top Spiral Binding  ── */}
+
       <div className="spiral-header">
         {[...Array(34)].map((_, i) => <div key={i} className="spiral-ring" />)}
       </div>
 
-      {/* ── Hero Image Section [cite: 7, 27] ── */}
       <div className="hero-section">
         <div className="absolute top-6 left-6 flex gap-2 z-30">
           <button onClick={handlePrevMonth} className="nav-arrow">←</button>
@@ -120,9 +170,9 @@ export default function Calendar() {
         <img 
           src={heroImage}
           className={`hero-img ${isFlipping ? 'flip-out' : 'flip-in'}`}
-          alt={`Calendar hero for ${format(viewDate, "MMMM")}`}
+          alt=""
         />
-        
+
         <div className="blue-accent-left" />
         <div className="blue-accent-right" />
 
@@ -132,8 +182,8 @@ export default function Calendar() {
         </div>
       </div>
 
-    
       <div className="calendar-body">
+
         <div className="notes-column">
           <Notes 
             monthlyNote={monthlyNote}
@@ -142,18 +192,19 @@ export default function Calendar() {
             currentRangeNote={currentRangeKey ? (rangeNotes[currentRangeKey] || "") : ""}
             onRangeNoteChange={(note) => {
               if (currentRangeKey) {
-                setRangeNotes({ ...rangeNotes, [currentRangeKey]: note });
+                const updated = { ...rangeNotes, [currentRangeKey]: note };
+                setRangeNotes(updated);
               }
             }}
           />
         </div>
 
         <div className="grid-column">
-        
+
           {(range.start || range.end) && (
             <div className="selection-stats">
-              <span className="stat-label">📊</span>
-              <span className="stat-text">
+              <span>📊 </span>
+              <span>
                 {range.end 
                   ? `${Math.abs((range.end - range.start) / (1000 * 60 * 60 * 24)) + 1} days selected`
                   : "Start date selected"}
@@ -162,8 +213,8 @@ export default function Calendar() {
           )}
 
           <div className="weekday-header">
-            {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((d, i) => (
-              <span key={d} className={i > 4 ? "text-weekend" : "text-weekday"}>{d}</span>
+            {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((d) => (
+              <span key={d}>{d}</span>
             ))}
           </div>
 
