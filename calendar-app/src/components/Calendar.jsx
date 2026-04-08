@@ -87,15 +87,6 @@ export default function Calendar() {
     }
   }, [viewDate, monthRanges]);
 
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (e.key === "ArrowRight") handleNextMonth();
-      if (e.key === "ArrowLeft") handlePrevMonth();
-    };
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
-
   const handlePrevMonth = () => {
     setIsFlipping(true);
     setTimeout(() => {
@@ -147,6 +138,48 @@ export default function Calendar() {
         end: newRange.end
       }
     });
+  };
+
+  const handleClearSelection = () => {
+    if (!range.start) {
+      alert("Please select dates first");
+      return;
+    }
+
+    if (!window.confirm("Clear selected dates and notes?")) return;
+
+    const key = format(viewDate, "yyyy-MM");
+
+    const updated = { ...rangeNotes };
+    Object.keys(updated).forEach(k => {
+      if (k.startsWith(key)) delete updated[k];
+    });
+
+    setRangeNotes(updated);
+
+    setRange({ start: null, end: null });
+
+    setMonthRanges({
+      ...monthRanges,
+      [key]: { start: null, end: null }
+    });
+  };
+
+  const handleClearMonthlyNote = () => {
+    if (!monthlyNote.trim()) {
+      alert("Please add a note first");
+      return;
+    }
+
+    if (!window.confirm("Clear monthly note?")) return;
+
+    const key = format(viewDate, "yyyy-MM");
+
+    const saved = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
+    delete saved[key];
+    localStorage.setItem("monthlyNotes", JSON.stringify(saved));
+
+    setMonthlyNote("");
   };
 
   const getRangeKey = () => {
@@ -241,6 +274,23 @@ export default function Calendar() {
               );
             })}
           </div>
+
+          <div className="mt-3 flex gap-2">
+            <button 
+              onClick={handleClearSelection}
+              className="flex-1 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded hover:bg-red-600"
+            >
+              Clear Selection
+            </button>
+
+            <button 
+              onClick={handleClearMonthlyNote}
+              className="flex-1 px-2 py-1 text-xs font-semibold text-white bg-gray-500 rounded hover:bg-gray-600"
+            >
+              Clear Notes
+            </button>
+          </div>
+
         </div>
       </div>
     </div>
