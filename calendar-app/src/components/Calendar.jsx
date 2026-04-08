@@ -30,46 +30,56 @@ export default function Calendar() {
   const [monthRanges, setMonthRanges] = useState({});
   const [isFlipping, setIsFlipping] = useState(false);
 
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [notesLoaded, setNotesLoaded] = useState(false);
+  const [monthNoteLoaded, setMonthNoteLoaded] = useState(false);
+
   const heroImage = HERO_IMAGES[viewDate.getMonth() % HERO_IMAGES.length];
 
   const getMonthKey = (date) => format(date, "yyyy-MM");
 
   useEffect(() => {
-    const savedNotes = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
+    const saved = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
     const key = getMonthKey(viewDate);
-    setMonthlyNote(savedNotes[key] || "");
+    setMonthlyNote(saved[key] || "");
+    setMonthNoteLoaded(true);
   }, [viewDate]);
 
   useEffect(() => {
-    const savedNotes = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
+    if (!monthNoteLoaded) return;
+    const saved = JSON.parse(localStorage.getItem("monthlyNotes")) || {};
     const key = getMonthKey(viewDate);
-    savedNotes[key] = monthlyNote;
-    localStorage.setItem("monthlyNotes", JSON.stringify(savedNotes));
-  }, [monthlyNote, viewDate]);
+    saved[key] = monthlyNote;
+    localStorage.setItem("monthlyNotes", JSON.stringify(saved));
+  }, [monthlyNote, viewDate, monthNoteLoaded]);
 
   useEffect(() => {
-    const savedRangeNotes = JSON.parse(localStorage.getItem("rangeNotes")) || {};
-    setRangeNotes(savedRangeNotes);
+    const saved = JSON.parse(localStorage.getItem("rangeNotes")) || {};
+    setRangeNotes(saved);
+    setNotesLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!notesLoaded) return;
     localStorage.setItem("rangeNotes", JSON.stringify(rangeNotes));
-  }, [rangeNotes]);
+  }, [rangeNotes, notesLoaded]);
 
   useEffect(() => {
-    const savedRanges = JSON.parse(localStorage.getItem("monthRanges")) || {};
-    setMonthRanges(savedRanges);
+    const saved = JSON.parse(localStorage.getItem("monthRanges")) || {};
+    setMonthRanges(saved);
+    setIsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!isLoaded) return;
     localStorage.setItem("monthRanges", JSON.stringify(monthRanges));
-  }, [monthRanges]);
+  }, [monthRanges, isLoaded]);
 
   useEffect(() => {
     const key = format(viewDate, "yyyy-MM");
     if (monthRanges[key]) {
       setRange({
-        start: new Date(monthRanges[key].start),
+        start: monthRanges[key].start ? new Date(monthRanges[key].start) : null,
         end: monthRanges[key].end ? new Date(monthRanges[key].end) : null
       });
     } else {
@@ -112,11 +122,17 @@ export default function Calendar() {
   const handleDateClick = (d) => {
     let newRange;
 
-    if (!range.start || (range.start && range.end)) {
+    if (!range.start) {
       newRange = { start: d, end: null };
-    } else if (d > range.start) {
-      newRange = { ...range, end: d };
-    } else {
+    } 
+    else if (range.start && !range.end) {
+      if (d < range.start || d.getTime() === range.start.getTime()) {
+        newRange = { start: null, end: null };
+      } else {
+        newRange = { start: range.start, end: d };
+      }
+    } 
+    else {
       newRange = { start: d, end: null };
     }
 
@@ -156,7 +172,6 @@ export default function Calendar() {
 
   return (
     <div className="calendar-container">
-
       <div className="spiral-header">
         {[...Array(34)].map((_, i) => <div key={i} className="spiral-ring" />)}
       </div>
@@ -167,11 +182,7 @@ export default function Calendar() {
           <button onClick={handleNextMonth} className="nav-arrow">→</button>
         </div>
 
-        <img 
-          src={heroImage}
-          className={`hero-img ${isFlipping ? 'flip-out' : 'flip-in'}`}
-          alt=""
-        />
+        <img src={heroImage} className={`hero-img ${isFlipping ? 'flip-out' : 'flip-in'}`} alt="" />
 
         <div className="blue-accent-left" />
         <div className="blue-accent-right" />
@@ -183,7 +194,6 @@ export default function Calendar() {
       </div>
 
       <div className="calendar-body">
-
         <div className="notes-column">
           <Notes 
             monthlyNote={monthlyNote}
@@ -200,10 +210,8 @@ export default function Calendar() {
         </div>
 
         <div className="grid-column">
-
           {(range.start || range.end) && (
             <div className="selection-stats">
-              <span>📊 </span>
               <span>
                 {range.end 
                   ? `${Math.abs((range.end - range.start) / (1000 * 60 * 60 * 24)) + 1} days selected`
