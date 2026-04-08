@@ -1,96 +1,173 @@
-import { useState } from "react";
-import {
-  format,
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  addDays,
-  addMonths,
-  subMonths,
-} from "date-fns";
-
+import React, { useState, useEffect } from "react";
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameDay, isWithinInterval } from "date-fns";
 import DayCell from "./DayCell";
 import Notes from "./Notes";
 
-export default function Calendar() {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
-
-  const handleClick = (day) => {
-  if (!startDate) {
-    setStartDate(day);
-  } else if (!endDate) {
-    if (day < startDate) {
-      setStartDate(day); // restart selection
-    } else {
-      setEndDate(day);
-    }
-  } else {
-    setStartDate(day);
-    setEndDate(null);
-  }
+// Common holidays (month-day format)
+const HOLIDAYS = {
+  "01-01": "New Year's Day",
+  "02-14": "Valentine's Day",
+  "03-17": "St. Patrick's Day",
+  "04-22": "Earth Day",
+  "07-04": "Independence Day",
+  "10-31": "Halloween",
+  "12-25": "Christmas",
+  "12-31": "New Year's Eve",
 };
 
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(monthStart);
-  const startGrid = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const endGrid = endOfWeek(monthEnd, { weekStartsOn: 1 });
+export default function Calendar() {
+  const [viewDate, setViewDate] = useState(new Date());
+  const [range, setRange] = useState({ start: null, end: null });
+  const [monthlyNote, setMonthlyNote] = useState("");
+  const [rangeNotes, setRangeNotes] = useState({});
+  const [isFlipping, setIsFlipping] = useState(false);
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextMonth();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevMonth();
+      }
+    };
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, []);
+
+  const handlePrevMonth = () => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      setViewDate(subMonths(viewDate, 1));
+      setIsFlipping(false);
+    }, 300);
+  };
+
+  const handleNextMonth = () => {
+    setIsFlipping(true);
+    setTimeout(() => {
+      setViewDate(addMonths(viewDate, 1));
+      setIsFlipping(false);
+    }, 300);
+  };
+
+  // Generate Calendar Grid logic [cite: 10-23]
   const days = [];
-  let day = startGrid;
-  while (day <= endGrid) {
+  let day = startOfWeek(startOfMonth(viewDate), { weekStartsOn: 1 });
+  for (let i = 0; i < 42; i++) {
     days.push(day);
     day = addDays(day, 1);
   }
 
+  const handleDateClick = (d) => {
+    if (!range.start || (range.start && range.end)) {
+      setRange({ start: d, end: null });
+    } else if (d > range.start) {
+      setRange({ ...range, end: d });
+    } else {
+      setRange({ start: d, end: null });
+    }
+  };
+
+  const getRangeKey = () => {
+    if (!range.start) return null;
+    if (!range.end) return `${format(range.start, "yyyy-MM-dd")}`;
+    return `${format(range.start, "yyyy-MM-dd")}_${format(range.end, "yyyy-MM-dd")}`;
+  };
+
+  const getRangeLabel = () => {
+    if (!range.start) return null;
+    if (!range.end) return format(range.start, "MMM d, yyyy");
+    return `${format(range.start, "MMM d")} - ${format(range.end, "MMM d, yyyy")}`;
+  };
+
+  const currentRangeKey = getRangeKey();
+  const currentRangeLabel = getRangeLabel();
+
+
   return (
-    <div className="calendar-wrapper">
+    <div className="calendar-container">
+      {/* ── Top Spiral Binding  ── */}
+      <div className="spiral-header">
+        {[...Array(34)].map((_, i) => <div key={i} className="spiral-ring" />)}
+      </div>
 
-      {/* SPIRAL */}
-      <div className="spiral"></div>
+      {/* ── Hero Image Section [cite: 7, 27] ── */}
+      <div className="hero-section">
+        <div className="absolute top-6 left-6 flex gap-2 z-30">
+          <button onClick={handlePrevMonth} className="nav-arrow">←</button>
+          <button onClick={handleNextMonth} className="nav-arrow">→</button>
+        </div>
 
-      {/* IMAGE */}
-      <div className="image-container">
-        <img src="/calendar.jpg" alt="calendar" />
+        <img 
+          src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80" 
+          className={`hero-img ${isFlipping ? 'flip-out' : 'flip-in'}`}
+          alt="Wall Calendar Visual Anchor"
+        />
+        
+        <div className="blue-accent-left" />
+        <div className="blue-accent-right" />
 
-        <div className="blue-shape left"></div>
-        <div className="blue-shape right"></div>
-
-        <div className="month-text">
-          <span className="month-year">{format(currentDate, "yyyy")}</span>
-          <span className="month-name">{format(currentDate, "MMMM")}</span>
+        <div className="hero-date-label">
+          <p className="year-label">{format(viewDate, "yyyy")}</p>
+          <p className="month-label">{format(viewDate, "MMMM")}</p>
         </div>
       </div>
 
-      {/* BODY */}
+      {/* ── Interaction Body (Responsive) [cite: 31-35] ── */}
       <div className="calendar-body">
+        <div className="notes-column">
+          <Notes 
+            monthlyNote={monthlyNote}
+            onMonthlyNoteChange={setMonthlyNote}
+            currentRangeLabel={currentRangeLabel}
+            currentRangeNote={currentRangeKey ? (rangeNotes[currentRangeKey] || "") : ""}
+            onRangeNoteChange={(note) => {
+              if (currentRangeKey) {
+                setRangeNotes({ ...rangeNotes, [currentRangeKey]: note });
+              }
+            }}
+          />
+        </div>
 
-        {/* NOTES */}
-        <Notes />
+        <div className="grid-column">
+          {/* Selection Stats */}
+          {(range.start || range.end) && (
+            <div className="selection-stats">
+              <span className="stat-label">📊</span>
+              <span className="stat-text">
+                {range.end 
+                  ? `${Math.abs((range.end - range.start) / (1000 * 60 * 60 * 24)) + 1} days selected`
+                  : "Start date selected"}
+              </span>
+            </div>
+          )}
 
-        {/* GRID */}
-        <div className="grid">
+          <div className="weekday-header">
+            {["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"].map((d, i) => (
+              <span key={d} className={i > 4 ? "text-weekend" : "text-weekday"}>{d}</span>
+            ))}
+          </div>
 
-          {["MON","TUE","WED","THU","FRI","SAT","SUN"].map((d) => (
-            <div className="header" key={d}>{d}</div>
-          ))}
-
-          {days.map((d, i) => (
-           <DayCell
-  key={i}
-  day={d}
-  currentDate={currentDate}
-  startDate={startDate}
-  endDate={endDate}
-  onClick={handleClick}
-/>
-          ))}
-
+          <div className="days-grid">
+            {days.map((d, i) => {
+              const holiday = HOLIDAYS[format(d, "MM-dd")];
+              return (
+                <DayCell
+                  key={i}
+                  date={d}
+                  activeMonth={viewDate}
+                  range={range}
+                  onClick={() => handleDateClick(d)}
+                  holiday={holiday}
+                />
+              );
+            })}
+          </div>
         </div>
       </div>
-      <div className="bottom-fade"></div>
     </div>
   );
 }

@@ -1,57 +1,38 @@
-import {
-  format,
-  isSameDay,
-  isWithinInterval,
-  getDay,
-  isSameMonth,
-  isToday,
-} from "date-fns";
+import { format, isSameMonth, isSameDay, isWithinInterval, getDay } from "date-fns";
 
-export default function DayCell({
-  day,
-  currentDate,
-  startDate,
-  endDate,
-  onClick,
-}) {
-  let cls = "day";
+export default function DayCell({ date, activeMonth, range, onClick, holiday }) {
+  const isCurrentMonth = isSameMonth(date, activeMonth);
+  const isStart = range.start && isSameDay(date, range.start);
+  const isEnd = range.end && isSameDay(date, range.end);
+  const inRange = range.start && range.end && isWithinInterval(date, { start: range.start, end: range.end });
+  const isWeekend = getDay(date) === 0 || getDay(date) === 6;
+  const isToday = isSameDay(date, new Date());
 
-  // ✅ Check faded FIRST
-  const isFaded = !isSameMonth(day, currentDate);
-  if (isFaded) cls += " faded";
-
-  // 🔵 Weekend
-  const dayIndex = getDay(day);
-  if (dayIndex === 0 || dayIndex === 6) {
-    cls += " weekend";
-  }
-
-  // ⭐ Today
-  if (isToday(day)) {
-    cls += " today";
-  }
-
-  // ✅ Apply selection ONLY if not faded
-  if (!isFaded) {
-    if (startDate && isSameDay(day, startDate)) cls += " start";
-    else if (endDate && isSameDay(day, endDate)) cls += " end";
-    else if (
-      startDate &&
-      endDate &&
-      isWithinInterval(day, { start: startDate, end: endDate })
-    ) {
-      cls += " range";
-    }
+  let classes = "day-cell ";
+  if (!isCurrentMonth) {
+    classes += "text-gray-200 pointer-events-none ";
+  } else if (isStart && isEnd) {
+    classes += "range-single ";
+  } else if (isStart) {
+    classes += "range-start ";
+  } else if (isEnd) {
+    classes += "range-end ";
+  } else if (inRange) {
+    classes += "in-range-date ";
+  } else if (isToday) {
+    classes += "today-date ";
+  } else if (holiday) {
+    classes += "holiday-date ";
+  } else if (isWeekend) {
+    classes += "text-sky-500 ";
+  } else {
+    classes += "text-gray-800 ";
   }
 
   return (
-    <div
-      className={cls}
-      onClick={() => {
-        if (!isFaded) onClick(day); // disable faded click
-      }}
-    >
-      {format(day, "d")}
+    <div onClick={isCurrentMonth ? onClick : undefined} className={classes} title={holiday}>
+      {format(date, "d")}
+      {holiday && <span className="holiday-dot" />}
     </div>
   );
 }
