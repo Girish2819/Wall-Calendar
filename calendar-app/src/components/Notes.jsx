@@ -10,14 +10,10 @@ export default function Notes({
       <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-800 mb-2 border-b border-gray-100 pb-2">
         Notes
       </h4>
-      
-      {/* <p className="text-[8px] text-gray-400 mb-3 italic">
-        ⌨️ Use arrow keys to navigate months
-      </p> */}
 
       <div className="mb-4">
         <label className="text-[9px] font-semibold uppercase tracking-wide text-gray-600 block mb-2">
-          📅 Monthly Memo
+           Monthly Memo
         </label>
         <div className="lined-paper h-24">
           <textarea 
@@ -33,7 +29,7 @@ export default function Notes({
       {/* Range-Specific Notes */}
       <div className="border-t border-gray-100 pt-4">
         <label className="text-[9px] font-semibold uppercase tracking-wide text-blue-600 block mb-2">
-          📌 {currentRangeLabel || "Date range notes"}
+           {currentRangeLabel || "Date range notes"}
         </label>
         <div className="lined-paper h-20">
           <textarea 

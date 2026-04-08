@@ -3,7 +3,6 @@ import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, en
 import DayCell from "./DayCell";
 import Notes from "./Notes";
 
-// Common holidays (month-day format)
 const HOLIDAYS = {
   "01-01": "New Year's Day",
   "02-14": "Valentine's Day",
@@ -39,7 +38,7 @@ export default function Calendar() {
 
   const heroImage = HERO_IMAGES[viewDate.getMonth() % HERO_IMAGES.length];
 
-  // Keyboard navigation
+  
   useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === "ArrowRight") {
@@ -70,7 +69,7 @@ export default function Calendar() {
     }, 300);
   };
 
-  // Generate Calendar Grid logic [cite: 10-23]
+  
   const days = [];
   let day = startOfWeek(startOfMonth(viewDate), { weekStartsOn: 1 });
   for (let i = 0; i < 42; i++) {
@@ -133,7 +132,7 @@ export default function Calendar() {
         </div>
       </div>
 
-      {/* ── Interaction Body (Responsive) [cite: 31-35] ── */}
+    
       <div className="calendar-body">
         <div className="notes-column">
           <Notes 
@@ -150,7 +149,7 @@ export default function Calendar() {
         </div>
 
         <div className="grid-column">
-          {/* Selection Stats */}
+        
           {(range.start || range.end) && (
             <div className="selection-stats">
               <span className="stat-label">📊</span>

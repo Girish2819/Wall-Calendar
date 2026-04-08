@@ -1,7 +1,5 @@
 # Calendar App
 
-A responsive React + Vite wall-calendar UI with interactive date range selection, note sections, and month navigation.
-
 ## Features
 
 - Current month calendar display with real-time date rendering
@@ -14,7 +12,7 @@ A responsive React + Vite wall-calendar UI with interactive date range selection
 
 ## Built with
 
-- React 19
+- React
 - Vite
 - date-fns
 - Tailwind CSS utility classes
