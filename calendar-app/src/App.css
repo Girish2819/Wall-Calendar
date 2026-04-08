@@ -87,7 +87,7 @@ body {
 /* ── Hero & W-Curve [cite: 5] ── */
 .hero-section { 
   position: relative; 
-  height: 320px; /* Slightly taller to accommodate the deep curve */
+  height: 240px; /* Slightly taller to accommodate the deep curve */
   background: #fff;
   overflow: hidden;
 }

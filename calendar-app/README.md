@@ -1,16 +1,61 @@
-# React + Vite
+# Calendar App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive React + Vite wall-calendar UI with interactive date range selection, note sections, and month navigation.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Current month calendar display with real-time date rendering
+- Previous/next month navigation using buttons and keyboard arrows
+- Date range selection with start/end highlighting
+- Holiday markers for common calendar dates
+- Monthly memo and range-specific notes panel
+- Responsive layout for desktop and mobile
+- Decorative hero section with blue mountain-style divider and image
 
-## React Compiler
+## Built with
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- Vite
+- date-fns
+- Tailwind CSS utility classes
+- CSS for responsive styling and animations
 
-## Expanding the ESLint configuration
+## Project structure
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- `src/App.jsx` — application shell
+- `src/components/Calendar.jsx` — main calendar component and interactions
+- `src/components/DayCell.jsx` — individual day cell rendering and selection states
+- `src/components/Notes.jsx` — monthly and range notes UI
+- `src/App.css` — global styling and hero/calendar layout
+
+## Getting started
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Notes
+
+- The calendar uses `date-fns` for date calculations and formatting.
+- The notes panel is designed to preserve space for range notes even before a range is selected.
+- The app includes a visible shadowed container and responsive grid for smaller screens.

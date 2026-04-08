@@ -15,12 +15,29 @@ const HOLIDAYS = {
   "12-31": "New Year's Eve",
 };
 
+const HERO_IMAGES = [
+  "/1.jpg",
+  "/2.jpg",
+  "/3.jpg",
+  "/4.jpg",
+  "/5.jpg",
+  "/6.jpg",
+  "/7.jpg",
+  "/8.jpg",
+  "/9.jpg",
+  "/10.jpg",
+  "/11.jpg",
+  "/12.jpg",
+];
+
 export default function Calendar() {
   const [viewDate, setViewDate] = useState(new Date());
   const [range, setRange] = useState({ start: null, end: null });
   const [monthlyNote, setMonthlyNote] = useState("");
   const [rangeNotes, setRangeNotes] = useState({});
   const [isFlipping, setIsFlipping] = useState(false);
+
+  const heroImage = HERO_IMAGES[viewDate.getMonth() % HERO_IMAGES.length];
 
   // Keyboard navigation
   useEffect(() => {
@@ -102,9 +119,9 @@ export default function Calendar() {
         </div>
 
         <img 
-          src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80" 
+          src={heroImage}
           className={`hero-img ${isFlipping ? 'flip-out' : 'flip-in'}`}
-          alt="Wall Calendar Visual Anchor"
+          alt={`Calendar hero for ${format(viewDate, "MMMM")}`}
         />
         
         <div className="blue-accent-left" />
