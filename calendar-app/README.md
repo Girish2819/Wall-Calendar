@@ -8,7 +8,18 @@
 - Holiday markers for common calendar dates
 - Monthly memo and range-specific notes panel
 - Responsive layout for desktop and mobile
-- Decorative hero section with blue mountain-style divider and image
+- smart selecton logic 
+⏺ clicking the past date cancel selection
+⏺ clicking same date reset selection 
+
+persistant data logic using localstorage
+⏺notes saved after reload
+⏺selection restored per month
+
+alert when no selection or empty notes
+confirmation before eletion notes
+
+
 
 ## Built with
 
